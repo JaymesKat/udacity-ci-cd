@@ -74,13 +74,75 @@ jobs:
             cd backend
             npm i
             npm run build
+      - run:
+          name: Set git Commit Message
+          command: |
+            echo 'export GIT_COMMIT_DESC=$(git log --oneline -1 --pretty=format:"%h %s , %ar")' >> $BASH_ENV
+            source $BASH_ENV
       - slack/notify:
           event: fail
-          channel: "general, deployment-notifications"
-          template: basic_fail_1
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": ":exclamation: *${CIRCLE_JOB}* job failed! \n"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Build job:*\n${CIRCLE_JOB}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Commit:*\n${GIT_COMMIT_DESC}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch:*\n${CIRCLE_BRANCH}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Project:*\n${CIRCLE_PROJECT_REPONAME}"
+                    }
+                  ]
+                }
+              ]
+            }
       - slack/notify:
           event: pass
-          template: success_tagged_deploy_1
+          custom: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": ":tada: *${CIRCLE_JOB}* succeeded!\n"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Build job:*\n${CIRCLE_JOB}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Commit:*\n${GIT_COMMIT_DESC}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Branch:*\n${CIRCLE_BRANCH}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Project:*\n${CIRCLE_PROJECT_REPONAME}"
+                    }
+                  ]
+                }
+              ]
+            }
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
