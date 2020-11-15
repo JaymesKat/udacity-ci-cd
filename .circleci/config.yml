@@ -36,18 +36,6 @@ commands:
             fi
 
 jobs:
-  deploy:
-    docker:
-      - image: "cimg/base:stable"
-    steps:
-      - run: echo "deploy my app"
-      - slack/notify:
-          event: fail
-          mentions: "@James Katarikawe"
-          template: basic_fail_1
-      - slack/notify:
-          event: pass
-          template: success_tagged_deploy_1
   build-frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -62,6 +50,13 @@ jobs:
             npm i
             npm run lint
             npm run build
+      - slack/notify:
+          event: fail
+          channel: "general, deployment-notifications"
+          template: basic_fail_1
+      - slack/notify:
+          event: pass
+          template: success_tagged_deploy_1
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build-1
@@ -79,6 +74,13 @@ jobs:
             cd backend
             npm i
             npm run build
+      - slack/notify:
+          event: fail
+          channel: "general, deployment-notifications"
+          template: basic_fail_1
+      - slack/notify:
+          event: pass
+          template: success_tagged_deploy_1
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
