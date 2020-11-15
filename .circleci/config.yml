@@ -1,11 +1,16 @@
 version: 2.1
 
-defaults: &defaults
-  - run:
-      name: Set git Commit Message
-      command: |
-        echo 'export GIT_COMMIT_DESC=$(git log --oneline -1 --pretty=format:"%h %s , %ar")' >> $BASH_ENV
-        source $BASH_ENV
+orbs:
+  slack: circleci/slack@4.1.1
+
+commands:
+  notify_slack:
+    steps:
+      - run:
+          name: Set git Commit Message
+          command: |
+            echo 'export GIT_COMMIT_DESC=$(git log --oneline -1 --pretty=format:"%h %s")' >> $BASH_ENV
+            source $BASH_ENV
       - slack/notify:
           event: fail
           custom: |
@@ -20,15 +25,15 @@ defaults: &defaults
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Build job:*\n${CIRCLE_JOB}"
+                      "text": "*Build job:*\n${CIRCLE_JOB}\n"
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Commit:*\n${GIT_COMMIT_DESC}"
+                      "text": "*Commit:*\n${GIT_COMMIT_DESC}\n"
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Branch:*\n${CIRCLE_BRANCH}"
+                      "text": "*Branch:*\n${CIRCLE_BRANCH}\n"
                     },
                     {
                       "type": "mrkdwn",
@@ -52,15 +57,15 @@ defaults: &defaults
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Build job:*\n${CIRCLE_JOB}"
+                      "text": "*Build job:*\n${CIRCLE_JOB}\n"
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Commit:*\n${GIT_COMMIT_DESC}"
+                      "text": "*Commit:*\n${GIT_COMMIT_DESC}\n"
                     },
                     {
                       "type": "mrkdwn",
-                      "text": "*Branch:*\n${CIRCLE_BRANCH}"
+                      "text": "*Branch:*\n${CIRCLE_BRANCH}\n"
                     },
                     {
                       "type": "mrkdwn",
@@ -70,10 +75,7 @@ defaults: &defaults
                 }
               ]
             }
-orbs:
-  slack: circleci/slack@4.1.1
 
-commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
@@ -120,7 +122,7 @@ jobs:
             npm i
             npm run lint
             npm run build
-      <<: *defaults
+      - notify_slack
 
   build-backend:
     docker:
@@ -135,7 +137,7 @@ jobs:
             cd backend
             npm i
             npm run build
-      <<: *defaults
+      - notify_slack
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
