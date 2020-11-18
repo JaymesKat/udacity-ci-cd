@@ -203,11 +203,11 @@ jobs:
           name: Ensure back-end infrastructure exists
           command: |
             aws cloudformation deploy \
+              --tags app=webserver
               --template-file .circleci/files/backend.yml \
-              #--tags project=your-tag \
-              # --stack-name "your back-end stack name with workflow id" \
-              # --parameter-overrides ID="your workflow id"
-              exit 1
+              --stack-name "uda-people-xnwcdviizn" \
+              --parameter-overrides ID="xnwcdviizn" \
+              --template-body file://files/backend.yml
       - run:
           name: Ensure front-end infrastructure exist
           command: |
