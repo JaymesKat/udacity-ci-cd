@@ -10,14 +10,30 @@
     state: latest
     update_cache: yes
 
+- name: Remove node_modules directory
+  file:
+    path: /root/project/backend/node_modules
+    state: absent
+
+- name: Stop PM2
+  ignore_errors: yes
+  shell: |
+    pm2 stop backend
+    pm2 delete backend
+
 - name: "Upload project"
   become: yes
   copy:
     src: /root/project/backend
     dest: /home/ubuntu
 
-- name: Build node service
+- name: Build backend service
   shell: |
     cd /home/ubuntu/backend
     npm i
     npm run build
+
+- name: Start pm2 service
+  shell: |
+    cd /home/ubuntu/backend
+    pm2 start npm --name backend -- start
