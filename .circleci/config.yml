@@ -407,6 +407,7 @@ jobs:
           command: |
             cd .circleci
             export OldWorkflowID=$(aws cloudformation list-exports --query "Exports[?Name=='WorkflowID'].Value" --region us-west-1 --no-paginate --output text)
+            echo ${OldWorkflowID}
             if [ -n "${OldWorkflowID}" ];
             then
               aws cloudformation update-stack  \
