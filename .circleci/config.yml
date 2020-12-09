@@ -434,6 +434,7 @@ jobs:
       - checkout
       - run:
           name: Delete Old Stack
+          no_output_timeout: 30m
           command: |
             export OldWorkflowID=$(aws cloudformation list-exports --query "Exports[?Name=='WorkflowID'].Value" --region us-west-1 --no-paginate --output text)
             if [ -n "${OldWorkflowID}" ];
